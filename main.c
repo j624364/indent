@@ -12,14 +12,22 @@ char* indent_string;
 char stdin_buffer[STDIN_BUFFER_SIZE];
 int bytes_read = 0;
 
+void print_indent() {
+	int i;
+
+	for (i = 0; i < indent_level; i++) {
+		printf("%s", indent_string);
+	}
+}
+
 void print_help_message() {
 	printf("\n");
-	printf("\tUsage: indent [options]\n");
-	printf("\tReads from standard input and outputs to standard output with an indent.\n");
+	print_indent(); printf("Usage: indent [options]\n");
+	print_indent(); printf("Reads from standard input and outputs to standard output with an indent.\n");
 	printf("\n");
-	printf("\tOptions:\n");
-	printf("\t--level, -l    \t Sets the number of characters to indent by. Default: 4\n");
-	printf("\t--character, -c\t Sets the string to indent with: Default: ' '\n");
+	print_indent(); printf("Options:\n");
+	print_indent(); printf("--level, -l    \t Sets the number of characters to indent by. Default: 4\n");
+	print_indent(); printf("--character, -c\t Sets the string to indent with: Default: ' '\n");
 	printf("\n");
 }
 
