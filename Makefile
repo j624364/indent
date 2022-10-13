@@ -5,8 +5,9 @@ OUTPUTFILE=indent
 CFLAGS=-ansi -pedantic-errors -Wall
 LFLAGS=
 TESTPROGRAM=printf "Hello,\nWorld\n"
+INSTALLDIR=/usr/bin
 
-.PHONY: all test clean
+.PHONY: all install test clean
 
 all: $(OUTPUTFILE)
 
@@ -17,6 +18,9 @@ $(OUTPUTFILE): $(OBJECTFILES)
 
 %.o: %.c $(HEADERFILES)
 	cc -c $< $(CFLAGS)
+
+install: $(OUTPUTFILE)
+	sudo cp $(OUTPUTFILE) $(INSTALLDIR)
 
 test: $(OUTPUTFILE)
 	@$(TESTPROGRAM) | ./$(OUTPUTFILE)
