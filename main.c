@@ -34,6 +34,9 @@ void* ccalloc(size_t num, size_t size) {
 }
 
 void cfree(void* ptr) {
+	if (ptr == NULL)
+		return;
+
 	free(ptr);
 
 #ifdef _DEBUG
