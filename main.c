@@ -28,10 +28,8 @@ int streq(const char* msg1, const char* msg2) {
 }
 
 int parse_args(int argc, char** argv) {
-	int i, has_set_indent_string;
+	int i;
 	str2int_errno int_conv_res;
-
-	has_set_indent_string = 0;
 
 	for (i = 1; i < argc; i++) {
 		if (streq(argv[i], "--level") || streq(argv[i], "-l")) {
@@ -57,16 +55,11 @@ int parse_args(int argc, char** argv) {
 			}
 
 			indent_string = argv[i];
-			has_set_indent_string = 1;
 		}
 		else {
 			print_help_message();
 			return EXIT_FAILURE;
 		}
-	}
-
-	if (!has_set_indent_string) {
-		indent_string = " ";
 	}
 
 	return EXIT_SUCCESS;
@@ -78,17 +71,11 @@ int read_stdin() {
 	return bytes_read > 0;
 }
 
-void print_indent() {
-	int i;
-
-	for (i = 0; i < indent_level; i++) {
-		printf("%s", indent_string);
-	}
-}
-
 int main(int argc, char** argv) {
 
 	int res, i, is_newline;
+
+	indent_string = " ";
 
 	/* parse the command line arguments */
 	res = parse_args(argc, argv);
