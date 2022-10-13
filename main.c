@@ -12,6 +12,33 @@ char* indent_string;
 char stdin_buffer[STDIN_BUFFER_SIZE];
 int bytes_read = 0;
 
+#ifdef _DEBUG
+#include <assert.h>
+unsigned int allocated = 0;
+#endif
+
+void* ccalloc(size_t num, size_t size) {
+	void* ptr = calloc(num, size);
+
+	if (ptr == NULL) {
+		printf("Could not allocate memory!");
+	}
+
+#ifdef _DEBUG
+	allocated++;
+#endif
+
+	return ptr;
+}
+
+void cfree(void* ptr) {
+	free(ptr);
+
+#ifdef _DEBUG
+	allocated--;
+#endif
+}
+
 void set_indent_string(const char* source) {
 	int origpos, newpos, length, is_escaped;
 
@@ -24,7 +51,7 @@ void set_indent_string(const char* source) {
 	is_escaped = 0;
 
 	length = strlen(source);
-	indent_string = (char*)calloc(length, sizeof(char));
+	indent_string = (char*)ccalloc(length, sizeof(char));
 
 	for (origpos = 0; origpos < length; origpos++) {
 		if (is_escaped) {
@@ -159,7 +186,11 @@ int read_stdin() {
 
 void clearup() {
 	if (indent_string != NULL)
-		free(indent_string);
+		cfree(indent_string);
+
+#if _DEBUG
+	assert(allocated == 0);
+#endif
 }
 
 int main(int argc, char** argv) {
