@@ -8,7 +8,7 @@ TESTPROGRAM=printf "Hello,\nWorld\n"
 INSTALLDIR=/usr/bin
 INSTALLPATH=$(INSTALLDIR)/$(OUTPUTFILE)
 
-.PHONY: all install test clean
+.PHONY: all install uninstall test clean
 
 all: $(OUTPUTFILE)
 
@@ -24,6 +24,9 @@ install: $(INSTALLPATH)
 
 $(INSTALLPATH): $(OUTPUTFILE)
 	sudo cp $(OUTPUTFILE) $(INSTALLDIR)
+
+uninstall:
+	sudo rm -f $(INSTALLPATH)
 
 test: $(OUTPUTFILE)
 	@$(TESTPROGRAM) | ./$(OUTPUTFILE)
