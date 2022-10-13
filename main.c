@@ -2,15 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "string_to_int.h"
 
-#define STDIN_BUFFER_SIZE 1024
+#define BUFFER_SIZE 1024
 
 int indent_level = 4;
 char* indent_string;
-char stdin_buffer[STDIN_BUFFER_SIZE];
+char file_buffer[BUFFER_SIZE];
 int bytes_read = 0;
+int has_printed_file = 0;
 
 #ifdef _DEBUG
 #include <assert.h>
@@ -134,8 +136,56 @@ int streq(const char* msg1, const char* msg2) {
 	return strcmp(msg1, msg2) == 0;
 }
 
+int file_exists(const char* path) {
+	struct stat buffer;
+	return (stat (path, &buffer) == 0);
+}
+
+int print_file(const char* path) {
+	FILE* file;
+	int i, is_newline, bytes_read;
+
+	has_printed_file = 1;
+
+	if (indent_string == NULL)
+		set_default_indent();
+
+	is_newline = 1;
+
+	file = fopen(path, "r");
+	if (!file)
+		return EXIT_FAILURE;
+
+	while ((bytes_read = fread(file_buffer, 1, BUFFER_SIZE, file)) > 0) {
+		if (ferror(file)) {
+			fclose(file);
+			return EXIT_SUCCESS;
+		}
+
+		for (i = 0; i < bytes_read; i++) {
+			if (file_buffer[i] == '\n') {
+				putchar('\n');
+				is_newline = 1;
+			}
+			else if (file_buffer[i] == '\0' || file_buffer[i] == EOF) {
+				/* do nothing */
+			}
+			else {
+				if (is_newline) {
+					print_indent();
+					is_newline = 0;
+				}
+
+				putchar(file_buffer[i]);
+			}
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
 int parse_args(int argc, char** argv) {
-	int i, has_custom_indent;
+	int i, has_custom_indent, res;
 	str2int_errno int_conv_res;
 
 	has_custom_indent = 0;
@@ -167,8 +217,17 @@ int parse_args(int argc, char** argv) {
 			has_custom_indent = 1;
 		}
 		else {
-			print_help_message();
-			return EXIT_FAILURE;
+			/* assume a file */
+			if (file_exists(argv[i])) {
+				res = print_file(argv[i]);
+
+				if (res != EXIT_SUCCESS)
+					return res;
+			}
+			else {
+				print_help_message();
+				return EXIT_FAILURE;
+			}
 		}
 	}
 
@@ -176,12 +235,6 @@ int parse_args(int argc, char** argv) {
 		set_default_indent();
 
 	return EXIT_SUCCESS;
-}
-
-int read_stdin() {
-	bytes_read = read(STDIN_FILENO, stdin_buffer, STDIN_BUFFER_SIZE);
-
-	return bytes_read > 0;
 }
 
 void clearup() {
@@ -195,7 +248,7 @@ void clearup() {
 
 int main(int argc, char** argv) {
 
-	int res, i, is_newline;
+	int res;
 
 	indent_string = NULL;
 
@@ -206,27 +259,13 @@ int main(int argc, char** argv) {
 		return res;
 	}
 
-	is_newline = 1;
-
-	while(read_stdin()) {
-		for (i = 0; i < bytes_read; i++) {
-			if (stdin_buffer[i] == '\n') {
-				putchar('\n');
-				is_newline = 1;
-			}
-			else if (stdin_buffer[i] == '\0' || stdin_buffer[i] == EOF) {
-				/* do nothing */
-			}
-			else {
-				if (is_newline) {
-					print_indent();
-					is_newline = 0;
-				}
-
-				putchar(stdin_buffer[i]);
-			}
+	if (!has_printed_file) {
+		res = print_file("/dev/stdin");
+		if (res != EXIT_SUCCESS) {
+			clearup();
+			return res;
 		}
-	}	
+	}
 
 	clearup();
 	return EXIT_SUCCESS;
