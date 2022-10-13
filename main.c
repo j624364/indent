@@ -12,6 +12,71 @@ char* indent_string;
 char stdin_buffer[STDIN_BUFFER_SIZE];
 int bytes_read = 0;
 
+void set_indent_string(const char* source) {
+	int origpos, newpos, length, is_escaped;
+
+	if (indent_string != NULL) {
+		free(indent_string);
+	}
+
+	origpos = 0;
+	newpos = 0;
+	is_escaped = 0;
+
+	length = strlen(source);
+	indent_string = (char*)calloc(length, sizeof(char));
+
+	for (origpos = 0; origpos < length; origpos++) {
+		if (is_escaped) {
+			/* just add ones from c */
+			switch (source[origpos]) {
+				case 'a':
+					indent_string[newpos++] = '\a';
+					break;
+				case 'b':
+					indent_string[newpos++] = '\b';
+					break;
+				case 'f':
+					indent_string[newpos++] = '\f';
+					break;
+				case 'n':
+					indent_string[newpos++] = '\n';
+					break;
+				case 'r':
+					indent_string[newpos++] = '\r';
+					break;
+				case 't':
+					indent_string[newpos++] = '\t';
+					break;
+				case 'v':
+					indent_string[newpos++] = '\v';
+					break;
+				case '\\':
+					indent_string[newpos++] = '\\';
+					break;
+				case '\'':
+					indent_string[newpos++] = '\'';
+					break;
+				case '"':
+					indent_string[newpos++] = '"';
+					break;
+				case '?':
+					indent_string[newpos++] = '?';
+					break;
+				default:
+					indent_string[newpos++] = source[origpos];
+					break;
+			}
+		}
+		else if (source[origpos] == '\\') {
+			is_escaped = 1;
+		}
+		else {
+			indent_string[newpos++] = source[origpos];
+		}
+	}
+}
+
 void print_indent() {
 	int i;
 
@@ -20,7 +85,14 @@ void print_indent() {
 	}
 }
 
+void set_default_indent() {
+	set_indent_string(" ");
+}
+
 void print_help_message() {
+	if (indent_string == NULL)
+		set_default_indent();
+
 	printf("\n");
 	print_indent(); printf("Usage: indent [options]\n");
 	print_indent(); printf("Reads from standard input and outputs to standard output with an indent.\n");
@@ -36,8 +108,10 @@ int streq(const char* msg1, const char* msg2) {
 }
 
 int parse_args(int argc, char** argv) {
-	int i;
+	int i, has_custom_indent;
 	str2int_errno int_conv_res;
+
+	has_custom_indent = 0;
 
 	for (i = 1; i < argc; i++) {
 		if (streq(argv[i], "--level") || streq(argv[i], "-l")) {
@@ -62,13 +136,17 @@ int parse_args(int argc, char** argv) {
 				return EXIT_FAILURE;
 			}
 
-			indent_string = argv[i];
+			set_indent_string(argv[i]);
+			has_custom_indent = 1;
 		}
 		else {
 			print_help_message();
 			return EXIT_FAILURE;
 		}
 	}
+
+	if (!has_custom_indent)
+		set_default_indent();
 
 	return EXIT_SUCCESS;
 }
@@ -79,16 +157,23 @@ int read_stdin() {
 	return bytes_read > 0;
 }
 
+void clearup() {
+	if (indent_string != NULL)
+		free(indent_string);
+}
+
 int main(int argc, char** argv) {
 
 	int res, i, is_newline;
 
-	indent_string = " ";
+	indent_string = NULL;
 
 	/* parse the command line arguments */
 	res = parse_args(argc, argv);
-	if (res != EXIT_SUCCESS)
+	if (res != EXIT_SUCCESS) {
+		clearup();
 		return res;
+	}
 
 	is_newline = 1;
 
@@ -112,6 +197,7 @@ int main(int argc, char** argv) {
 		}
 	}	
 
+	clearup();
 	return EXIT_SUCCESS;
 }
 
