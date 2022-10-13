@@ -130,6 +130,9 @@ void print_help_message() {
 	print_indent(); printf("--level, -l    \t Sets the number of characters to indent by. Default: 4\n");
 	print_indent(); printf("--character, -c\t Sets the string to indent with: Default: ' '\n");
 	printf("\n");
+	print_indent(); printf("Anything other option will print this message and exit the program.\n");
+	print_indent(); printf("If a file can not be found it will be assumed to be an option.\n");
+	printf("\n");
 }
 
 int streq(const char* msg1, const char* msg2) {
