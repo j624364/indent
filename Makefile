@@ -16,7 +16,7 @@ all: $(OUTPUTFILE)
 $(OUTPUTFILE): $(OBJECTFILES)
 	cc $(LFLAGS) $(OBJECTFILES) -o $@
 
-%.o: %.c $(HEADERFILES)
+%.o: %.c $(HEADERFILES) Makefile
 	cc -c $< $(CFLAGS)
 
 install: $(OUTPUTFILE)
