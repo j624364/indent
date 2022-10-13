@@ -32,7 +32,7 @@ void print_help_message() {
 }
 
 int streq(const char* msg1, const char* msg2) {
-	return strcmp(msg1, msg2) != 0;
+	return strcmp(msg1, msg2) == 0;
 }
 
 int parse_args(int argc, char** argv) {
