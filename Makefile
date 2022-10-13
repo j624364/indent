@@ -6,6 +6,7 @@ CFLAGS=-ansi -pedantic-errors -Wall -O3
 LFLAGS=
 TESTPROGRAM=printf "Hello,\nWorld\n"
 INSTALLDIR=/usr/bin
+INSTALLPATH=$(INSTALLDIR)/$(OUTPUTFILE)
 
 .PHONY: all install test clean
 
@@ -19,7 +20,9 @@ $(OUTPUTFILE): $(OBJECTFILES)
 %.o: %.c $(HEADERFILES) Makefile
 	cc -c $< $(CFLAGS)
 
-install: $(OUTPUTFILE)
+install: $(INSTALLPATH)
+
+$(INSTALLPATH): $(OUTPUTFILE)
 	sudo cp $(OUTPUTFILE) $(INSTALLDIR)
 
 test: $(OUTPUTFILE)
