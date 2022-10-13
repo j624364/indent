@@ -4,7 +4,7 @@ OBJECTFILES=$(SOURCEFILES:.c=.o)
 OUTPUTFILE=indent
 CFLAGS=-ansi -pedantic-errors -Wall
 LFLAGS=
-TESTPROGRAM=pfetch
+TESTPROGRAM=printf "Hello,\nWorld\n"
 
 .PHONY: all test clean
 
@@ -19,7 +19,7 @@ $(OUTPUTFILE): $(OBJECTFILES)
 	cc -c $< $(CFLAGS)
 
 test: $(OUTPUTFILE)
-	pfetch | ./indent
+	@$(TESTPROGRAM) | ./$(OUTPUTFILE)
 
 clean:
 	rm -rf $(OUTPUTFILE) $(OBJECTFILES)
