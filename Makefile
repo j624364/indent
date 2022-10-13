@@ -2,7 +2,7 @@ SOURCEFILES=$(wildcard *.c)
 HEADERFILES=$(wildcard *.h)
 OBJECTFILES=$(SOURCEFILES:.c=.o)
 OUTPUTFILE=indent
-CFLAGS=-ansi -pedantic-errors -Wall
+CFLAGS=-ansi -pedantic-errors -Wall -O3
 LFLAGS=
 TESTPROGRAM=printf "Hello,\nWorld\n"
 INSTALLDIR=/usr/bin
