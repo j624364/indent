@@ -99,6 +99,8 @@ void set_indent_string(const char* source) {
 					indent_string[newpos++] = source[origpos];
 					break;
 			}
+
+			is_escaped = 0;
 		}
 		else if (source[origpos] == '\\') {
 			is_escaped = 1;
